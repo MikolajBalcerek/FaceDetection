@@ -1,0 +1,5 @@
+http://docs.opencv.org/3.3.0/da/d60/tutorial_face_main.html
+http://www.pyimagesearch.com/…/local-binary-patterns-with-…/
+http://hanzratech.in/…/03/face-recognition-using-opencv.html
+https://www.superdatascience.com/opencv-face-detection/
+https://www.superdatascience.com/opencv-face-recognition/
