@@ -1,0 +1,6 @@
+	Dobór parametrów do rozpoznawania twarzy algorytmu LBP
+
+
+Stworzuyæ tabelkê wydajnoœci do rozdzielczoœci
+Pobawiæ siê parametrami  detect Multiscale(..,...,..)
+
