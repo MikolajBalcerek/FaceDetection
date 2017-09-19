@@ -56,11 +56,19 @@ if __name__ == "__main__":
     for option in options:
         for r in range(0,radius_range):
             print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
-            train_lbps = calc_lbps(Xtrain, option, r);
+            train_lbps  = calc_lbps(Xtrain, option, r);
             train_histograms = calc_histograms(train_lbps);
 
             test_lbps = calc_lbps(Xtest, option, r);
             test_histograms = calc_histograms(test_lbps);
+
+            for img in train_lbps:
+                cv2.imshow("TRAIN LBPS", img)
+                cv2.waitKey(20);
+
+            for img in test_lbps:
+                cv2.imshow("TEST LBPS", img)
+                cv2.waitKey(80);
 
             results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms]);
             #print("Accuracy to {}".format(calc_acc(results, Ytest)))
