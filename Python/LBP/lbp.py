@@ -6,10 +6,9 @@ from scipy.stats import itemfreq
 import numpy as np
 
 
-def calc_lbps(X):
+
+def calc_lbps(X, method, radius):
     """Mikołaj oblicza lbps."""
-    radius = 3
-    method = 'default'
     # inne opcje to ror, uniform, var, nri_uniform
     return np.array([local_binary_pattern(img, radius*8, radius, method=method) for img in X])
 
@@ -41,14 +40,36 @@ def calc_acc(results, Ytest):
 
 
 if __name__ == "__main__":
+    #przygotowanie danych
     Xtrain, Ytrain = prepare_data('train')
     Xtest, Ytest = prepare_data('test')
 
-    train_lbps = calc_lbps(Xtrain)
-    train_histograms = calc_histograms(train_lbps)
+    # testowanie różnych opcji masowo
+    # parametry dla calc_lbps(X)
+    options = ["ror", "uniform", "var", "nri_uniform"];
+    radius_range = 5;
+    multiply_list = [1, 2, 4, 6, 8, 16];
 
-    test_lbps = calc_lbps(Xtest)
-    test_histograms = calc_histograms(test_lbps)
 
-    results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms])
-    print("Accuracy to {}".format(calc_acc(results, Ytest)))
+
+    mass_results = []; #tablica z wynikiem wszystkich testów
+    for option in options:
+        for r in range(0,radius_range):
+            print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
+            train_lbps = calc_lbps(Xtrain, option, r);
+            train_histograms = calc_histograms(train_lbps);
+
+            test_lbps = calc_lbps(Xtest, option, r);
+            test_histograms = calc_histograms(test_lbps);
+
+            results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms]);
+            #print("Accuracy to {}".format(calc_acc(results, Ytest)))
+
+            #dodanie do massresults tablicy;
+
+            mass_results.append([option, r, format(calc_acc(results, Ytest))]);
+
+    #wypisanie wyjścia
+    print("Wyjście dla wszystkich opcji: \n")
+    for output in mass_results:
+        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]));

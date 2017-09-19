@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 import cv2
 import os
 import numpy as np
 
 
-def load_data(purpose, num_people=3):
+def load_data(purpose, num_people=2):
     """Wczytuje obrazki i przyporządkowane im etykiety. Działa pod Windą (\\ zamiast /).
     purpose - train / test, 
     num_people - liczba osób."""
@@ -50,15 +51,7 @@ def show_undetected_faces(seconds=20):
         undetected = [i for i, img in enumerate(faces) if img is None]
         for x in X[undetected]:
             cv2.imshow("Smuteczek", x)
-            cv2.waitKey(seconds*1000)
-
-
-if __name__ == '__main__':
-    show_undetected_faces()
-
-# ja = cv2.imread("szalone.jpg")
-# cv2.imshow("przed", ja)
-# cv2.waitKey(100)
+        aitKey(100)
 # face, rect = detect_face(ja)
 
 # Xtrain, Ytrain = prepare_data('train')
