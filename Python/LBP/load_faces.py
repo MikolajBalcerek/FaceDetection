@@ -43,7 +43,7 @@ def prepare_data(purpose):
     return X[detected], Y[detected]
 
 
-def show_undetected_faces(seconds=20):
+def show_undetected_faces(seconds=1):
     for abc in ("train", "test"):
         X, Y = load_data(abc)
         faces = np.array([detect_face(img) for img in X])
@@ -53,16 +53,53 @@ def show_undetected_faces(seconds=20):
             cv2.waitKey(seconds*1000)
 
 
+
+def show_detected_faces(seconds=0.5):
+    for abc in ("train", "test"):
+        X, Y = load_data(abc)
+        faces = np.array([detect_face(img) for img in X])
+        detected = [i for i, img in enumerate(faces) if img is not None];
+        for x in X[detected]:
+            cv2.imshow("Znalazlem go", x);
+            cv2.waitKey(1000);
+
+
+def start_count_tests():
+    countDetectedAll = 0;
+    countPhotosAll = 0;
+    print("\n Rozpoczynam wykonanie testów: \n");
+    for abc in ("train", "test"):
+        print("Zestaw " + str(abc) + "\n");
+
+        X, Y = load_data(abc)
+        countPhotos = X.size;
+        print("Załadowano " + str(countPhotos) + " zdjęć \n");
+
+        print("Wykrywam twarze funkcją detect_face..\n")
+        faces = np.array([detect_face(img) for img in X])
+        detected = [i for i, img in enumerate(faces) if img is not None];
+        countDetected = X[detected].size;
+        print(str(abc) + ":  Znaleziono " + str(countDetected) + " z wszystkich " + str(countPhotos) + "\n");
+
+        countPhotosAll = countPhotosAll + countPhotos;
+        countDetectedAll = countDetectedAll + countDetected;
+
+    print("WSZYSTKIE" + ":  Znaleziono " + str(countDetectedAll) + " z wszystkich " + str(countPhotosAll) + "\n");
+
+
 if __name__ == '__main__':
-    show_undetected_faces()
+    start_count_tests();
+
+    #show_undetected_faces();
+    #show_detected_faces();
 
 # ja = cv2.imread("szalone.jpg")
-# cv2.imshow("przed", ja)
-# cv2.waitKey(100)
-# face, rect = detect_face(ja)
-
-# Xtrain, Ytrain = prepare_data('train')
-# Xtest, Ytest = prepare_data('test')
-# for i, img in enumerate(Xtrain):
-#     cv2.imshow('index of this person is ' + str(Ytrain[i]), img)
-#     cv2.waitKey(4000)
+#     cv2.imshow("przed", ja)
+#     cv2.waitKey(100)
+#     face, rect = detect_face(ja)
+#
+#     Xtrain, Ytrain = prepare_data('train')
+#     Xtest, Ytest = prepare_data('test')
+#     for i, img in enumerate(Xtrain):
+#         cv2.imshow('index of this person is ' + str(Ytrain[i]), img)
+#         cv2.waitKey(4000)

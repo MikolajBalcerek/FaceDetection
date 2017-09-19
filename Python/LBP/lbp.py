@@ -47,14 +47,14 @@ if __name__ == "__main__":
     # testowanie różnych opcji masowo
     # parametry dla calc_lbps(X)
     options = ["ror", "uniform", "var", "nri_uniform"];
-    radius_range = 5;
+    radius_range = 100;
     multiply_list = [1, 2, 4, 6, 8, 16];
 
 
 
     mass_results = []; #tablica z wynikiem wszystkich testów
     for option in options:
-        for r in range(0,radius_range):
+        for r in range(1,radius_range, 10):
             print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
             train_lbps  = calc_lbps(Xtrain, option, r);
             train_histograms = calc_histograms(train_lbps);
@@ -64,11 +64,11 @@ if __name__ == "__main__":
 
             for img in train_lbps:
                 cv2.imshow("TRAIN LBPS", img)
-                cv2.waitKey(20);
+                cv2.waitKey(10);
 
             for img in test_lbps:
                 cv2.imshow("TEST LBPS", img)
-                cv2.waitKey(80);
+                cv2.waitKey(10);
 
             results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms]);
             #print("Accuracy to {}".format(calc_acc(results, Ytest)))
@@ -76,6 +76,8 @@ if __name__ == "__main__":
             #dodanie do massresults tablicy;
 
             mass_results.append([option, r, format(calc_acc(results, Ytest))]);
+
+
 
     #wypisanie wyjścia
     print("Wyjście dla wszystkich opcji: \n")
