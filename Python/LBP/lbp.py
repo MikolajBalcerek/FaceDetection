@@ -81,5 +81,6 @@ if __name__ == "__main__":
 
     #wypisanie wyjścia
     print("Wyjście dla wszystkich opcji: \n")
+    print("method  |  radius |  result   \n")
     for output in mass_results:
         print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]));

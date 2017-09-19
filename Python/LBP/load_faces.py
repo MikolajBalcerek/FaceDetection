@@ -38,7 +38,7 @@ def prepare_data(purpose):
     """Przygotowuje dane. Odpowiedzialna za preprocessing i normalizacje.
         purpose - train / test"""
     X, Y = load_data(purpose)
-    X = np.array([detect_face(img) for img in X])
+    X = np.array([detect_face(img, 1.2, 7) for img in X])
     detected = [i for i, img in enumerate(X) if img is not None]
     return X[detected], Y[detected]
 
@@ -94,10 +94,10 @@ if __name__ == '__main__':
 
     #PARAMETRY DO ZMIENIANIA DO TESTÓW
     #  tutaj można grzebać :)
-    scaleFactor_min_range = 10; #minimalny zasięg parametru scaleFactor, wartość /100
+    scaleFactor_min_range = 0; #minimalny zasięg parametru scaleFactor, wartość /100
     scaleFactor_max_range = 1000000; #maksymalny zasięg parametru scaleFactor, wartość /100
     scaleFactor_increment = 300000; #inkrement dla testów scaleFactor, wartość/100
-    minNeighbors_min_range = 1;  # minimalny zasięc parametru minNeighbors
+    minNeighbors_min_range = 0;  # minimalny zasięc parametru minNeighbors
     minNeighbors_max_range = 1000000; #maksymalny zasięc parametru minNeighbors
     minNeighbors_increment = 300000; #inkrement dla testów minNeighbors
 
