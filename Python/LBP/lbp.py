@@ -55,14 +55,16 @@ if __name__ == "__main__":
     Xtrain, Ytrain = prepare_data('train')
     Xtest, Ytest = prepare_data('test')
 
-    # lbp = calc_lbps(Xtrain, "default", 1)
-    # hists = calc_histograms(lbp)
-    # for x in hists:
-    #     print(x.shape)
-    # #
-
     # testowanie różnych opcji masowo
     # parametry dla calc_lbps(X)
+    options = ["ror", "uniform", "var", "nri_uniform"]; #opcje testowania lbp
+
+    #TUTAJ MOŻNA ZMIENIAĆ PARAMETRY
+
+    radius_max_range = 3; #maksymalna wartość dla radius którą osiągnie w testowaniu
+    radius_min_range = 1; # minimalna wartość dla radius od której się zacznie sprawdzanie możliwości
+    radius_increment = 1; #inkrement po którym ma się zmieniać radius
+    multiply_list = [1, 2, 4, 6, 8, 16];
     # var produkuje zbyt duże liczby, by na razie algorytm miał sensowną złożoność
     options = ["default", "ror", "uniform", "nri_uniform"]
     radius_range = 3
@@ -72,12 +74,14 @@ if __name__ == "__main__":
     #
     #
 
-    mass_results = [] #tablica z wynikiem wszystkich testów
+
+
+    mass_results = []; #tablica z wynikiem wszystkich testów
     for option in options:
-        for r in range(1, radius_range):
-            print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n")
-            train_lbps = calc_lbps(Xtrain, option, r)
-            train_histograms = calc_freqs(train_lbps)
+        for r in range(radius_min_range, radius_max_range, radius_increment):
+            print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
+            train_lbps = calc_lbps(Xtrain, option, r);
+            train_histograms = calc_histograms(train_lbps);
 
             test_lbps = calc_lbps(Xtest, option, r)
             test_histograms = calc_freqs(test_lbps)
@@ -104,4 +108,4 @@ if __name__ == "__main__":
     print("Wyjście dla wszystkich opcji: \n")
     print("method  |  radius |  result   \n")
     for output in mass_results:
-        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]))
+        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]));

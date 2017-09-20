@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 
-def load_data(purpose, num_people=2):
+def load_data(purpose, num_people=5):
     """Wczytuje obrazki i przyporządkowane im etykiety. Działa pod Windą (\\ zamiast /).
     purpose - train / test, 
     num_people - liczba osób."""
@@ -108,18 +108,24 @@ if __name__ == '__main__':
 
 
     #badanie wpływu zmiennych na rozpoznawanie twarzy
-    # for scaleFactor in range (scaleFactor_min_range, scaleFactor_max_range, scaleFactor_increment):
-    #     for minNeighbors in range (minNeighbors_min_range, minNeighbors_max_range, minNeighbors_increment):
-    #         scaleFactor = scaleFactor / 100; #inkrementacja po 0.1 * inkrment, nie da się for z float increments w Python 3
-    #         score = count_detection_tests(scaleFactor, minNeighbors);
-    #         results.append([scaleFactor, minNeighbors, [score]]);
-    #
-    #
-    # #wypisywanie rezultatów
-    # print("Wypisywanie wyników eksperymentu: \n")
-    # print("scaleFator | minNeighbors | Detected | Out of")
-    # for result in results:
-    #     print(str(result[0]) + " | " + str(result[1]) + " | " + str(result[2]));
+    for scaleFactor in range (scaleFactor_min_range, scaleFactor_max_range, scaleFactor_increment):
+        for minNeighbors in range (minNeighbors_min_range, minNeighbors_max_range, minNeighbors_increment):
+            scaleFactor = scaleFactor / 100; #inkrementacja po 0.1 * inkrment, nie da się for z float increments w Python 3
+            score = count_detection_tests(scaleFactor, minNeighbors);
+            results.append([scaleFactor, minNeighbors, [score]]);
+
+
+    #wypisywanie rezultatów
+    print("Wypisywanie wyników eksperymentu: \n")
+    print("scaleFator | minNeighbors | Detected | Out of")
+    for result in results:
+        print(str(result[0]) + " | " + str(result[1]) + " | " + str(result[2]));
+
+
+    #sprawdzanie czy ratio dla wykrywania zmieniło się kiedykolwiek dla wszystkich parametrów wobec ilości sukcesów pierwszego testu (dobranego przez Mietka)
+    if ((not results[0][2]) in results):
+        print("WYNIK ZMIENIŁ SIĘ W ZALEŻNOŚCI OD PARAMETRU!!!!");
+
 #show_undetected_faces();
 #show_detected_faces();
 
