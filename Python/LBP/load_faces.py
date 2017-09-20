@@ -108,18 +108,18 @@ if __name__ == '__main__':
 
 
     #badanie wpływu zmiennych na rozpoznawanie twarzy
-    for scaleFactor in range (scaleFactor_min_range, scaleFactor_max_range, scaleFactor_increment):
-        for minNeighbors in range (minNeighbors_min_range, minNeighbors_max_range, minNeighbors_increment):
-            scaleFactor = scaleFactor / 100; #inkrementacja po 0.1 * inkrment, nie da się for z float increments w Python 3
-            score = count_detection_tests(scaleFactor, minNeighbors);
-            results.append([scaleFactor, minNeighbors, [score]]);
-
-
-    #wypisywanie rezultatów
-    print("Wypisywanie wyników eksperymentu: \n")
-    print("scaleFator | minNeighbors | Detected | Out of")
-    for result in results:
-        print(str(result[0]) + " | " + str(result[1]) + " | " + str(result[2]));
+    # for scaleFactor in range (scaleFactor_min_range, scaleFactor_max_range, scaleFactor_increment):
+    #     for minNeighbors in range (minNeighbors_min_range, minNeighbors_max_range, minNeighbors_increment):
+    #         scaleFactor = scaleFactor / 100; #inkrementacja po 0.1 * inkrment, nie da się for z float increments w Python 3
+    #         score = count_detection_tests(scaleFactor, minNeighbors);
+    #         results.append([scaleFactor, minNeighbors, [score]]);
+    #
+    #
+    # #wypisywanie rezultatów
+    # print("Wypisywanie wyników eksperymentu: \n")
+    # print("scaleFator | minNeighbors | Detected | Out of")
+    # for result in results:
+    #     print(str(result[0]) + " | " + str(result[1]) + " | " + str(result[2]));
 #show_undetected_faces();
 #show_detected_faces();
 

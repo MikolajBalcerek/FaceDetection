@@ -6,7 +6,6 @@ from scipy.stats import itemfreq
 import numpy as np
 
 
-
 def calc_lbps(X, method, radius):
     """Mikołaj oblicza lbps."""
     # inne opcje to ror, uniform, var, nri_uniform
@@ -20,18 +19,30 @@ def show_lbps(X):
         cv2.waitKey(80000)
 
 
-def calc_histograms(lbps):
-    histograms = np.array([itemfreq(lbp.ravel) for lbp in lbps])
-    return np.array([hist[:, 1]/sum(hist[:, 1]) for hist in histograms])
-    # return np.vectorize(lambda hist: hist[:, 1]/sum(hist[:, 1]))(histograms)
+def calc_freqs(lbps):
+    return np.array([itemfreq(x.reshape(-1)) for x in lbps])
+
+
+def calc_histograms(hist1, hist2):
+    print(hist1.shape)
+    for x in hist1[:, 0]:
+        if x not in hist2[:, 0]:
+            hist2 = np.vstack((hist2, np.array([x, 0])))
+    for x in hist2[:, 0]:
+        if x not in hist1[:, 0]:
+            hist1 = np.vstack((hist1, np.array([x, 0])))
+    return hist1[:, 1]/max(hist1[:, 1]), hist2[:, 1]/max(hist2[:, 1])
 
 
 def classify_histogram(hist, train_hists):
-    hist = np.array(hist, dtype=np.float32)
-    train_hists = np.array([np.array(x, dtype=np.float32) for x in train_hists])
-    scores = np.array([cv2.compareHist(hist, x, cv2.HISTCMP_CORREL) for x in train_hists])
+    scores = []
+    for th in train_hists:
+        histNormal, thNormal = calc_histograms(hist, th)
+        scores.append(cv2.compareHist(np.array(histNormal, dtype=np.float32), np.array(thNormal, dtype=np.float32),
+                                      cv2.HISTCMP_CORREL))
+    scores = np.array(scores)
     print("Score to {}".format(scores))
-    index = np.argmin(scores)
+    index = np.argmax(scores)
     return Ytrain[index], scores[index]
 
 
@@ -44,38 +55,48 @@ if __name__ == "__main__":
     Xtrain, Ytrain = prepare_data('train')
     Xtest, Ytest = prepare_data('test')
 
+    # lbp = calc_lbps(Xtrain, "default", 1)
+    # hists = calc_histograms(lbp)
+    # for x in hists:
+    #     print(x.shape)
+    # #
+
     # testowanie różnych opcji masowo
     # parametry dla calc_lbps(X)
-    options = ["ror", "uniform", "var", "nri_uniform"];
-    radius_range = 100;
-    multiply_list = [1, 2, 4, 6, 8, 16];
+    # var produkuje zbyt duże liczby, by na razie algorytm miał sensowną złożoność
+    options = ["default", "ror", "uniform", "nri_uniform"]
+    radius_range = 3
+    multiply_list = [1, 2, 4, 6, 8, 16]
+    #
+    #
+    #
+    #
 
-
-
-    mass_results = []; #tablica z wynikiem wszystkich testów
+    mass_results = [] #tablica z wynikiem wszystkich testów
     for option in options:
-        for r in range(1,radius_range, 10):
-            print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
-            train_lbps  = calc_lbps(Xtrain, option, r);
-            train_histograms = calc_histograms(train_lbps);
+        for r in range(1, radius_range):
+            print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n")
+            train_lbps = calc_lbps(Xtrain, option, r)
+            train_histograms = calc_freqs(train_lbps)
 
-            test_lbps = calc_lbps(Xtest, option, r);
-            test_histograms = calc_histograms(test_lbps);
+            test_lbps = calc_lbps(Xtest, option, r)
+            test_histograms = calc_freqs(test_lbps)
 
-            for img in train_lbps:
-                cv2.imshow("TRAIN LBPS", img)
-                cv2.waitKey(10);
+            # for img in train_lbps:
+            #     cv2.imshow("TRAIN LBPS", img)
+            #     cv2.waitKey(10)
+            #
+            # for img in test_lbps:
+            #     cv2.imshow("TEST LBPS", img)
+            #     cv2.waitKey(10)
 
-            for img in test_lbps:
-                cv2.imshow("TEST LBPS", img)
-                cv2.waitKey(10);
-
-            results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms]);
-            #print("Accuracy to {}".format(calc_acc(results, Ytest)))
+            results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms])
+            print("Results to {}".format(results))
+            print("Accuracy to {}".format(calc_acc(results, Ytest)))
 
             #dodanie do massresults tablicy;
 
-            mass_results.append([option, r, format(calc_acc(results, Ytest))]);
+            mass_results.append([option, r, format(calc_acc(results, Ytest))])
 
 
 
@@ -83,4 +104,4 @@ if __name__ == "__main__":
     print("Wyjście dla wszystkich opcji: \n")
     print("method  |  radius |  result   \n")
     for output in mass_results:
-        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]));
+        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]))
