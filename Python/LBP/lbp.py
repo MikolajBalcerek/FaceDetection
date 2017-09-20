@@ -81,7 +81,7 @@ if __name__ == "__main__":
         for r in range(radius_min_range, radius_max_range, radius_increment):
             print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
             train_lbps = calc_lbps(Xtrain, option, r);
-            train_histograms = calc_histograms(train_lbps);
+            train_histograms = calc_freqs(train_lbps);
 
             test_lbps = calc_lbps(Xtest, option, r)
             test_histograms = calc_freqs(test_lbps)
