@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 
-def load_data(purpose, num_people=4):
+def load_data(purpose, num_people=5):
     """Wczytuje obrazki i przyporządkowane im etykiety. Działa pod Windą (\\ zamiast /).
     purpose - train / test, 
     num_people - liczba osób."""
@@ -120,6 +120,12 @@ if __name__ == '__main__':
     print("scaleFator | minNeighbors | Detected | Out of")
     for result in results:
         print(str(result[0]) + " | " + str(result[1]) + " | " + str(result[2]));
+
+
+    #sprawdzanie czy ratio dla wykrywania zmieniło się kiedykolwiek dla wszystkich parametrów wobec ilości sukcesów pierwszego testu (dobranego przez Mietka)
+    if ((not results[0][2]) in results):
+        print("WYNIK ZMIENIŁ SIĘ W ZALEŻNOŚCI OD PARAMETRU!!!!");
+
 #show_undetected_faces();
 #show_detected_faces();
 
