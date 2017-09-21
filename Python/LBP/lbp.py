@@ -4,12 +4,13 @@ from skimage.feature import local_binary_pattern
 from load_faces import prepare_data
 from scipy.stats import itemfreq
 import numpy as np
+from datetime import datetime
 
 
 def calc_lbps(X, method, radius):
     """Mikołaj oblicza lbps."""
     # inne opcje to ror, uniform, var, nri_uniform
-    return np.array([local_binary_pattern(img, radius*8, radius, method=method) for img in X])
+    return np.array([local_binary_pattern(cv2.resize(img, (255, 255)), radius*8, radius, method=method) for img in X])
 
 
 def show_lbps(X):
@@ -57,7 +58,7 @@ if __name__ == "__main__":
 
     # testowanie różnych opcji masowo
     # parametry dla calc_lbps(X)
-    options = ["ror", "uniform", "var", "nri_uniform"]; #opcje testowania lbp
+
 
     #TUTAJ MOŻNA ZMIENIAĆ PARAMETRY
 
@@ -67,12 +68,18 @@ if __name__ == "__main__":
     multiply_list = [1, 2, 4, 6, 8, 16];
     # var produkuje zbyt duże liczby, by na razie algorytm miał sensowną złożoność
     options = ["default", "ror", "uniform", "nri_uniform"]
-    radius_range = 3
+    #options = ["default"];
     multiply_list = [1, 2, 4, 6, 8, 16]
-    #
-    #
-    #
-    #
+
+
+
+    #zapisywanie do pliku wyników na żywo
+    #nazwa pliku
+    nazwa = "WYNIK_" + str(datetime.now().timestamp()) + ".txt";
+    #otwórz lub stwórz plik
+    file = open(nazwa, 'w+');
+    file.write("method  |  radius |  result   \n");
+    file.close();
 
 
 
@@ -86,6 +93,7 @@ if __name__ == "__main__":
             test_lbps = calc_lbps(Xtest, option, r)
             test_histograms = calc_freqs(test_lbps)
 
+            #WYŚWIETLANIE obrazków
             # for img in train_lbps:
             #     cv2.imshow("TRAIN LBPS", img)
             #     cv2.waitKey(10)
@@ -97,14 +105,20 @@ if __name__ == "__main__":
             results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms])
             print("Results to {}".format(results))
             print("Accuracy to {}".format(calc_acc(results, Ytest)))
+            print("DONE");
 
             #dodanie do massresults tablicy;
+            mass_results.append([option, r, format(calc_acc(results, Ytest))]);
 
-            mass_results.append([option, r, format(calc_acc(results, Ytest))])
+            #Dopisywanie do pliku
+            file = open(nazwa, 'a');
+            file.write(str(mass_results[-1]) + "\n");
+            file.flush();
+            file.close();
 
 
 
-    #wypisanie wyjścia
+    #wypisanie wyjścias
     print("Wyjście dla wszystkich opcji: \n")
     print("method  |  radius |  result   \n")
     for output in mass_results:
