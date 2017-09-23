@@ -15,7 +15,7 @@ def load_data(purpose, num_people=5):
         for name in dirs:
             path = os.path.abspath(current_dir + '\\' + name)
             X.append(cv2.imread(path, 0))
-            # 0 oznacza, że wczytujemy tylko czarno-białe zdjęcia, jak coś, to mogę to zmienić.
+            # 0 oznacza, że wczytujemy tylko czarno-białe zdjęcia.
             Y.append(i)
             print("\t file " + path + " read.")
     return np.array(X), np.array(Y)
@@ -51,7 +51,6 @@ def show_undetected_faces(seconds=1):
         for x in X[undetected]:
             cv2.imshow("Smuteczek", x)
             cv2.waitKey(seconds*1000)
-
 
 
 def show_detected_faces(seconds=0.5):
@@ -90,6 +89,7 @@ def count_detection_tests(scaleFactor, minNeighbors):
     print("WSZYSTKIE" + ":  Znaleziono " + str(countDetectedAll) + " z wszystkich " + str(countPhotosAll) + "\n");
     return [countDetectedAll, countPhotosAll];
 
+
 if __name__ == '__main__':
 
     #PARAMETRY DO ZMIENIANIA DO TESTÓW
@@ -102,27 +102,24 @@ if __name__ == '__main__':
     minNeighbors_increment = 300000; #inkrement dla testów minNeighbors
 
     results = []; #tablica zawierająca wyniki wszystkich testów
-    #testowanie dla ręcznie dobranyc# h zmiennych
+    # testowanie dla ręcznie dobranyc# h zmiennych
     score = count_detection_tests(1.2, 7);
     results.append([1.2, 7, [score]]);
 
-
-    #badanie wpływu zmiennych na rozpoznawanie twarzy
+    # badanie wpływu zmiennych na rozpoznawanie twarzy
     for scaleFactor in range (scaleFactor_min_range, scaleFactor_max_range, scaleFactor_increment):
         for minNeighbors in range (minNeighbors_min_range, minNeighbors_max_range, minNeighbors_increment):
             scaleFactor = scaleFactor / 100; #inkrementacja po 0.1 * inkrment, nie da się for z float increments w Python 3
             score = count_detection_tests(scaleFactor, minNeighbors);
             results.append([scaleFactor, minNeighbors, [score]]);
 
-
-    #wypisywanie rezultatów
+    # wypisywanie rezultatów
     print("Wypisywanie wyników eksperymentu: \n")
     print("scaleFator | minNeighbors | Detected | Out of")
     for result in results:
         print(str(result[0]) + " | " + str(result[1]) + " | " + str(result[2]));
 
-
-    #sprawdzanie czy ratio dla wykrywania zmieniło się kiedykolwiek dla wszystkich parametrów wobec ilości sukcesów pierwszego testu (dobranego przez Mietka)
+    # sprawdzanie czy ratio dla wykrywania zmieniło się kiedykolwiek dla wszystkich parametrów wobec ilości sukcesów pierwszego testu (dobranego przez Mietka)
     if ((not results[0][2]) in results):
         print("WYNIK ZMIENIŁ SIĘ W ZALEŻNOŚCI OD PARAMETRU!!!!");
 

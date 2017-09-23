@@ -11,6 +11,7 @@ def calc_lbps(X, method, radius):
     """Mikołaj oblicza lbps."""
     # inne opcje to ror, uniform, var, nri_uniform
     return np.array([local_binary_pattern(cv2.resize(img, (255, 255)), radius*8, radius, method=method) for img in X])
+    # return np.array([local_binary_pattern(img, radius * 8, radius, method=method) for img in X])
 
 
 def show_lbps(X):
@@ -20,35 +21,84 @@ def show_lbps(X):
         cv2.waitKey(80000)
 
 
-def calc_freqs(lbps):
+def calc_hists(lbps):
     return np.array([itemfreq(x.reshape(-1)) for x in lbps])
 
 
-def calc_histograms(hist1, hist2):
-    print(hist1.shape)
+def find_subarray(x, y):
+    indices = np.argsort(x)
+    sorted_x = x[indices]
+    sorted_indices = np.searchsorted(sorted_x, y)
+    return np.take(indices, sorted_indices, mode="clip")
+
+
+def fit_hists_fast(hist1, hist2):
+    sum = np.union1d(hist1[:, 0], hist2[:, 0])
+    res1, res2 = np.zeros(sum.shape[0]), np.zeros(sum.shape[0])
+    indexes1 = find_subarray(sum, hist1[:, 0])
+    indexes2 = find_subarray(sum, hist2[:, 0])
+    res1[indexes1] = hist1[:, 1]
+    res2[indexes2] = hist2[:, 1]
+    return res1 / np.max(res1), res2 / np.max(res2)
+
+
+def fit_hists_slow(hist1, hist2):
     for x in hist1[:, 0]:
         if x not in hist2[:, 0]:
             hist2 = np.vstack((hist2, np.array([x, 0])))
     for x in hist2[:, 0]:
         if x not in hist1[:, 0]:
             hist1 = np.vstack((hist1, np.array([x, 0])))
-    return hist1[:, 1]/max(hist1[:, 1]), hist2[:, 1]/max(hist2[:, 1])
+    return hist1[:, 1] / max(hist1[:, 1]), hist2[:, 1]/ max(hist2[:, 1])
 
 
-def classify_histogram(hist, train_hists):
+def classify_histogram(hist, train_hists, mthd="chisqr", spd="slow"):
     scores = []
+    method = {
+        "chisqr": cv2.HISTCMP_CHISQR,
+        "chisqr_alt": cv2.HISTCMP_CHISQR_ALT,
+        "correl": cv2.HISTCMP_CORREL,
+        "hellinger": cv2.HISTCMP_HELLINGER,
+        "kl_div": cv2.HISTCMP_KL_DIV,
+        "intersect": cv2.HISTCMP_INTERSECT
+    }[mthd]
     for th in train_hists:
-        histNormal, thNormal = calc_histograms(hist, th)
-        scores.append(cv2.compareHist(np.array(histNormal, dtype=np.float32), np.array(thNormal, dtype=np.float32),
-                                      cv2.HISTCMP_CORREL))
+        histNormal, thNormal = fit_hists_fast(hist, th) if spd == "fast" else fit_hists_slow(hist, th)
+        scores.append(cv2.compareHist(histNormal.astype(np.float32), thNormal.astype(np.float32), method))
     scores = np.array(scores)
-    print("Score to {}".format(scores))
-    index = np.argmax(scores)
+    index = np.argmax(scores) if mthd in ['correl', 'intersect'] else np.argmin(scores)
     return Ytrain[index], scores[index]
 
 
 def calc_acc(results, Ytest):
     return np.sum(results == Ytest) / Ytest.shape[0]
+
+
+def calc_all(Xtrain, option, r, method, speed, show=False):
+    train_lbps = calc_lbps(Xtrain, option, r)
+    train_histograms = calc_hists(train_lbps)
+
+    test_lbps = calc_lbps(Xtest, option, r)
+    test_histograms = calc_hists(test_lbps)
+
+    if show:
+        # WYŚWIETLANIE obrazków
+        for img in train_lbps:
+            cv2.imshow("TRAIN LBPS", img)
+            cv2.waitKey(10)
+
+        for img in test_lbps:
+            cv2.imshow("TEST LBPS", img)
+            cv2.waitKey(10)
+
+    results = np.array([classify_histogram(hist, train_histograms, spd=speed, mthd=method)[0]
+                        for hist in test_histograms])
+    print("Results to {}".format(results))
+    print("Accuracy to {}".format(calc_acc(results, Ytest)))
+    print("DONE")
+
+    # zwrócenie wyniku
+    return [option, r, format(calc_acc(results, Ytest))]
 
 
 if __name__ == "__main__":
@@ -62,12 +112,15 @@ if __name__ == "__main__":
 
     #TUTAJ MOŻNA ZMIENIAĆ PARAMETRY
 
-    radius_max_range = 3; #maksymalna wartość dla radius którą osiągnie w testowaniu
+    radius_max_range = 4; #maksymalna wartość dla radius którą osiągnie w testowaniu
     radius_min_range = 1; # minimalna wartość dla radius od której się zacznie sprawdzanie możliwości
     radius_increment = 1; #inkrement po którym ma się zmieniać radius
     multiply_list = [1, 2, 4, 6, 8, 16];
     # var produkuje zbyt duże liczby, by na razie algorytm miał sensowną złożoność
     options = ["default", "ror", "uniform", "nri_uniform"]
+    methods = ["chisqr", "chisqr_alt", "correl", "hellinger", "kl_div", "intersect"]
+    # metody porównywania hustogramów
+    speeds = ['fast', 'slow']
     #options = ["default"];
     multiply_list = [1, 2, 4, 6, 8, 16]
 
@@ -77,44 +130,25 @@ if __name__ == "__main__":
     #nazwa pliku
     nazwa = "WYNIK_" + str(datetime.now().timestamp()) + ".txt";
     #otwórz lub stwórz plik
-    file = open(nazwa, 'w+');
+    file = open(nazwa, 'w+')
     file.write("method  |  radius |  result   \n");
-    file.close();
+    file.close()
 
+    mass_results = [] #tablica z wynikiem wszystkich testów
 
+    for speed in ['fast', 'slow']:
+        for method in methods:
+            for option in options:
+                for r in range(radius_min_range, radius_max_range, radius_increment):
+                    print("Obliczenia dla spd = {0}, mthd = {1}, opt = {2}, r = {3}".format(
+                        speed, method, option, r))
+                    mass_results.append(calc_all(Xtrain, option, r, method, speed))
 
-    mass_results = []; #tablica z wynikiem wszystkich testów
-    for option in options:
-        for r in range(radius_min_range, radius_max_range, radius_increment):
-            print("Test dla opcji     " + option + " " + "radius " + str(r) + "\n");
-            train_lbps = calc_lbps(Xtrain, option, r);
-            train_histograms = calc_freqs(train_lbps);
-
-            test_lbps = calc_lbps(Xtest, option, r)
-            test_histograms = calc_freqs(test_lbps)
-
-            #WYŚWIETLANIE obrazków
-            # for img in train_lbps:
-            #     cv2.imshow("TRAIN LBPS", img)
-            #     cv2.waitKey(10)
-            #
-            # for img in test_lbps:
-            #     cv2.imshow("TEST LBPS", img)
-            #     cv2.waitKey(10)
-
-            results = np.array([classify_histogram(hist, train_histograms)[0] for hist in test_histograms])
-            print("Results to {}".format(results))
-            print("Accuracy to {}".format(calc_acc(results, Ytest)))
-            print("DONE");
-
-            #dodanie do massresults tablicy;
-            mass_results.append([option, r, format(calc_acc(results, Ytest))]);
-
-            #Dopisywanie do pliku
-            file = open(nazwa, 'a');
-            file.write(str(mass_results[-1]) + "\n");
-            file.flush();
-            file.close();
+                    #Dopisywanie do pliku
+                    file = open(nazwa, 'a')
+                    file.write(str(mass_results[-1]) + "\n")
+                    file.flush()
+                    file.close()
 
 
 
