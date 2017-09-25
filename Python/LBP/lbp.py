@@ -74,7 +74,7 @@ def calc_acc(results, Ytest):
     return np.sum(results == Ytest) / Ytest.shape[0]
 
 
-def calc_all(Xtrain, option, r, method, speed, size, show=False):
+def calc_all(Xtrain, option, r, method, speed, size, show=True):
     train_lbps = calc_lbps(Xtrain, option, r,size)
     train_histograms = calc_hists(train_lbps)
 
@@ -84,12 +84,16 @@ def calc_all(Xtrain, option, r, method, speed, size, show=False):
     if show:
         # WYŚWIETLANIE obrazków
         for img in train_lbps:
-            cv2.imshow("TRAIN LBPS", img)
-            cv2.waitKey(10)
+            #cv2.imshow("TRAIN LBP" + " Option: " + str(option) + "Radius: " + str(r) + "method: " + str(method) + "Speed: " + str(speed) + "Size: " + str(size) , img);
+            #cv2.waitKey(1)
+            cv2.imwrite(("TRAIN" +  str(option) + str(r) +  str(method) + str(speed) + str(size) + ".jpg"), img)
+            cv2.destroyAllWindows()
 
         for img in test_lbps:
-            cv2.imshow("TEST LBPS", img)
-            cv2.waitKey(10)
+            #cv2.imshow("TRAIN LBP" + " Option: " + str(option) + "Radius: " + str(r) + "method: " + str(method) + "Speed: " + str(speed) + "Size: " + str(size) , img);
+            #cv2.waitKey(1)
+            cv2.imwrite(("TRAIN" +  str(option) + str(r) +  str(method) + str(speed) + str(size) + ".jpg") , img)
+            cv2.destroyAllWindows()
 
     results = np.array([classify_histogram(hist, train_histograms, spd=speed, mthd=method)[0]
                         for hist in test_histograms])
@@ -123,16 +127,19 @@ if __name__ == "__main__":
     # metody porównywania hustogramów
     speeds = ['fast'] #, 'slow']
     #options = ["default"];
-    multiply_list = [1, 2, 4, 6, 8, 16]
 
+
+    #PROGRESS Bar
 
 
     #zapisywanie do pliku wyników na żywo
     #nazwa pliku
+
     nazwa = "WYNIK_" + str(datetime.now().timestamp()) + ".txt";
     #otwórz lub stwórz plik
-    file = open(nazwa, 'w+')
-    file.write("lbp option   |  radius |  result   |   method comparing histograms  |  speed  \n");
+    file = open(nazwa, 'w+');
+    topTableDescription = "lbp option   |  radius |  result   |   method comparing histograms  |  speed  | size \n";
+    file.write(topTableDescription);
     file.close()
 
     mass_results = [] #tablica z wynikiem wszystkich testów
@@ -143,7 +150,7 @@ if __name__ == "__main__":
                 for option in options:
                     for r in range(radius_min_range, radius_max_range, radius_increment):
                         print("Obliczenia dla speed = {0}, method = {1}, option = {2}, radius = {3}, size = {4} ".format(
-                        speed, method, option, r, size))
+                        speed, method, option, r, size));
                         mass_results.append(calc_all(Xtrain, option, r, method, speed, size));
 
                             #Dopisywanie do pliku
@@ -152,10 +159,8 @@ if __name__ == "__main__":
                         file.flush()
                         file.close()
 
-
-
     #wypisanie wyjścia
     print("Wyjście dla wszystkich opcji: \n")
-    print("method lbp option   |  radius |  result   |   method comparing histograms  |  speed   |  size \n")
+    print(topTableDescription);
     for output in mass_results:
         print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]) + str(output[3]) + str(output[4]) + str(output[5]));
