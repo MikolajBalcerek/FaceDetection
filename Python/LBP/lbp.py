@@ -156,4 +156,4 @@ if __name__ == "__main__":
     print("Wyjście dla wszystkich opcji: \n")
     print("method lbp option   |  radius |  result   |   method comparing histograms  |  speed  \n")
     for output in mass_results:
-        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]) + str(output[3] + str(output[4])));
+        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]) + str(output[3]) + str(output[4]));

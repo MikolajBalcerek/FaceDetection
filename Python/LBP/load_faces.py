@@ -1,7 +1,7 @@
 import cv2
 import os
 import numpy as np
-
+from datetime import datetime
 
 def load_data(purpose, num_people=55):
     """Wczytuje obrazki i przyporządkowane im etykiety. Działa pod Windą (\\ zamiast /).
@@ -94,17 +94,35 @@ if __name__ == '__main__':
 
     #PARAMETRY DO ZMIENIANIA DO TESTÓW
     #  tutaj można grzebać :)
-    scaleFactor_min_range = 0; #minimalny zasięg parametru scaleFactor, wartość /100
-    scaleFactor_max_range = 1000000; #maksymalny zasięg parametru scaleFactor, wartość /100
-    scaleFactor_increment = 300000; #inkrement dla testów scaleFactor, wartość/100
-    minNeighbors_min_range = 0;  # minimalny zasięc parametru minNeighbors
-    minNeighbors_max_range = 1000000; #maksymalny zasięc parametru minNeighbors
-    minNeighbors_increment = 300000; #inkrement dla testów minNeighbors
+    scaleFactor_min_range = 1; #minimalny zasięg parametru scaleFactor, wartość /100
+    scaleFactor_max_range = 100; #maksymalny zasięg parametru scaleFactor, wartość /100
+    scaleFactor_increment = 30; #inkrement dla testów scaleFactor, wartość/100
+    minNeighbors_min_range = 1;  # minimalny zasięc parametru minNeighbors
+    minNeighbors_max_range = 100; #maksymalny zasięc parametru minNeighbors
+    minNeighbors_increment = 30; #inkrement dla testów minNeighbors
+
+    #ZAPISYWANIE DO PLIKÓW
+    nazwa = "WYNIK_DETECT_LOAD_FACES" + str(datetime.now().timestamp()) + ".txt";
+    #otwórz lub stwórz plik
+    file = open(nazwa, 'w+')
+    file.write("scaleFator | minNeighbors | Detected | Out of \n");
+    file.close()
+
+
+    #T E S T O W A N I E
 
     results = []; #tablica zawierająca wyniki wszystkich testów
-    # testowanie dla ręcznie dobranyc# h zmiennych
+
+    # testowanie dla ręcznie dobranych zmiennych
     score = count_detection_tests(1.2, 7);
     results.append([1.2, 7, [score]]);
+    file = open(nazwa, 'a')
+    file.write("RĘCZNIE WYBRANE PARAMETRY \n")
+    file.write(str(results[-1]) + "\n");
+    file.write("--------------------------------------------------------" + "\n");
+    file.flush();
+    file.close();
+
 
     # badanie wpływu zmiennych na rozpoznawanie twarzy
     for scaleFactor in range (scaleFactor_min_range, scaleFactor_max_range, scaleFactor_increment):
@@ -112,6 +130,10 @@ if __name__ == '__main__':
             scaleFactor = scaleFactor / 100; #inkrementacja po 0.1 * inkrment, nie da się for z float increments w Python 3
             score = count_detection_tests(scaleFactor, minNeighbors);
             results.append([scaleFactor, minNeighbors, [score]]);
+            file = open(nazwa, 'a')
+            file.write(str(results)  + "\n");
+            file.flush();
+            file.close();
 
     # wypisywanie rezultatów
     print("Wypisywanie wyników eksperymentu: \n")
