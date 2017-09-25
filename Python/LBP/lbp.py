@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     #TUTAJ MOŻNA ZMIENIAĆ PARAMETRY
 
-    radius_max_range = 4; #maksymalna wartość dla radius którą osiągnie w testowaniu
+    radius_max_range = 2; #maksymalna wartość dla radius którą osiągnie w testowaniu
     radius_min_range = 1; # minimalna wartość dla radius od której się zacznie sprawdzanie możliwości
     radius_increment = 1; #inkrement po którym ma się zmieniać radius
     multiply_list = [1, 2, 4, 6, 8, 16];
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     nazwa = "WYNIK_" + str(datetime.now().timestamp()) + ".txt";
     #otwórz lub stwórz plik
     file = open(nazwa, 'w+')
-    file.write("method  |  radius |  result   \n");
+    file.write("lbp option   |  radius |  result   |   method comparing histograms  |  speed  \n");
     file.close()
 
     mass_results = [] #tablica z wynikiem wszystkich testów
@@ -140,20 +140,20 @@ if __name__ == "__main__":
         for method in methods:
             for option in options:
                 for r in range(radius_min_range, radius_max_range, radius_increment):
-                    print("Obliczenia dla spd = {0}, mthd = {1}, opt = {2}, r = {3}".format(
+                    print("Obliczenia dla speed = {0}, method = {1}, option = {2}, radius = {3}".format(
                         speed, method, option, r))
-                    mass_results.append(calc_all(Xtrain, option, r, method, speed))
+                    mass_results.append(calc_all(Xtrain, option, r, method, speed));
 
                     #Dopisywanie do pliku
                     file = open(nazwa, 'a')
-                    file.write(str(mass_results[-1]) + "\n")
+                    file.write(str(mass_results[-1]) + "  " + method + " " + speed + "\n")
                     file.flush()
                     file.close()
 
 
 
-    #wypisanie wyjścias
+    #wypisanie wyjścia
     print("Wyjście dla wszystkich opcji: \n")
-    print("method  |  radius |  result   \n")
+    print("method lbp option   |  radius |  result   |   method comparing histograms  |  speed  \n")
     for output in mass_results:
-        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]));
+        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]) + str(output[3] + str(output[4])));

@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 
-def load_data(purpose, num_people=5):
+def load_data(purpose, num_people=55):
     """Wczytuje obrazki i przyporządkowane im etykiety. Działa pod Windą (\\ zamiast /).
     purpose - train / test, 
     num_people - liczba osób."""
