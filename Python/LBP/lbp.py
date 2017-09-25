@@ -7,10 +7,10 @@ import numpy as np
 from datetime import datetime
 
 
-def calc_lbps(X, method, radius):
+def calc_lbps(X, method, radius, size):
     """Mikołaj oblicza lbps."""
     # inne opcje to ror, uniform, var, nri_uniform
-    return np.array([local_binary_pattern(cv2.resize(img, (255, 255)), radius*8, radius, method=method) for img in X])
+    return np.array([local_binary_pattern(cv2.resize(img, (size, size)), radius*8, radius, method=method) for img in X])
     # return np.array([local_binary_pattern(img, radius * 8, radius, method=method) for img in X])
 
 
@@ -66,7 +66,7 @@ def classify_histogram(hist, train_hists, mthd="chisqr", spd="slow"):
         histNormal, thNormal = fit_hists_fast(hist, th) if spd == "fast" else fit_hists_slow(hist, th)
         scores.append(cv2.compareHist(histNormal.astype(np.float32), thNormal.astype(np.float32), method))
     scores = np.array(scores)
-    index = np.argmax(scores) if mthd in ['correl', 'intersect'] else np.argmin(scores)
+    index = np.argmax(scores) if mthd in ['correl', 'intersect', 'kl_div'] else np.argmin(scores)
     return Ytrain[index], scores[index]
 
 
@@ -74,11 +74,11 @@ def calc_acc(results, Ytest):
     return np.sum(results == Ytest) / Ytest.shape[0]
 
 
-def calc_all(Xtrain, option, r, method, speed, show=False):
-    train_lbps = calc_lbps(Xtrain, option, r)
+def calc_all(Xtrain, option, r, method, speed, size, show=False):
+    train_lbps = calc_lbps(Xtrain, option, r,size)
     train_histograms = calc_hists(train_lbps)
 
-    test_lbps = calc_lbps(Xtest, option, r)
+    test_lbps = calc_lbps(Xtest, option, r, size)
     test_histograms = calc_hists(test_lbps)
 
     if show:
@@ -116,11 +116,12 @@ if __name__ == "__main__":
     radius_min_range = 1; # minimalna wartość dla radius od której się zacznie sprawdzanie możliwości
     radius_increment = 1; #inkrement po którym ma się zmieniać radius
     multiply_list = [1, 2, 4, 6, 8, 16];
+    listSizes = [50, 100, 255, 500];
     # var produkuje zbyt duże liczby, by na razie algorytm miał sensowną złożoność
     options = ["default", "ror", "uniform", "nri_uniform"]
     methods = ["chisqr", "chisqr_alt", "correl", "hellinger", "kl_div", "intersect"]
     # metody porównywania hustogramów
-    speeds = ['fast', 'slow']
+    speeds = ['fast'] #, 'slow']
     #options = ["default"];
     multiply_list = [1, 2, 4, 6, 8, 16]
 
@@ -136,24 +137,25 @@ if __name__ == "__main__":
 
     mass_results = [] #tablica z wynikiem wszystkich testów
 
-    for speed in ['fast', 'slow']:
-        for method in methods:
-            for option in options:
-                for r in range(radius_min_range, radius_max_range, radius_increment):
-                    print("Obliczenia dla speed = {0}, method = {1}, option = {2}, radius = {3}".format(
-                        speed, method, option, r))
-                    mass_results.append(calc_all(Xtrain, option, r, method, speed));
+    for speed in speeds:
+        for size in listSizes:
+            for method in methods:
+                for option in options:
+                    for r in range(radius_min_range, radius_max_range, radius_increment):
+                        print("Obliczenia dla speed = {0}, method = {1}, option = {2}, radius = {3}, size = {4} ".format(
+                        speed, method, option, r, size))
+                        mass_results.append(calc_all(Xtrain, option, r, method, speed, size));
 
-                    #Dopisywanie do pliku
-                    file = open(nazwa, 'a')
-                    file.write(str(mass_results[-1]) + "  " + method + " " + speed + "\n")
-                    file.flush()
-                    file.close()
+                            #Dopisywanie do pliku
+                        file = open(nazwa, 'a')
+                        file.write(str(mass_results[-1]) + "  " + method + " " + speed + " " + str(size) + "\n");
+                        file.flush()
+                        file.close()
 
 
 
     #wypisanie wyjścia
     print("Wyjście dla wszystkich opcji: \n")
-    print("method lbp option   |  radius |  result   |   method comparing histograms  |  speed  \n")
+    print("method lbp option   |  radius |  result   |   method comparing histograms  |  speed   |  size \n")
     for output in mass_results:
-        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]) + str(output[3]) + str(output[4]));
+        print(str(output[0]) + " | " + str(output[1]) + " | " + str(output[2]) + str(output[3]) + str(output[4]) + str(output[5]));
